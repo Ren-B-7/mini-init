@@ -1,5 +1,5 @@
-BINARY_NAME=mini
-INSTALL_DIR=$(HOME)/.local/bin
+BINARY_NAME = mini
+INSTALL_DIR = $(HOME)/.local/bin
 
 .PHONY: all build install clean uninstall test
 
@@ -22,3 +22,17 @@ clean:
 
 test:
 	cargo test
+
+.PHONY: lint lint-interactive run format
+
+lint:
+	cargo clippy
+
+lint-interactive:
+	bacon
+
+run:
+	cargo run
+
+format:
+	cargo fmt
