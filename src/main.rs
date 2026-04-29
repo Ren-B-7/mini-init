@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
-use include_dir::{include_dir, Dir, DirEntry};
+use include_dir::{Dir, DirEntry, include_dir};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -8,7 +8,7 @@ use std::process::Command;
 static TEMPLATES_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/templates");
 
 #[derive(Parser)]
-#[command(name = "mini")]
+#[command(name = "mini", version = "0.1.0")]
 #[command(bin_name = "mini")]
 #[command(about = "A mini CLI tool to manage projects", long_about = None)]
 struct Cli {
@@ -35,6 +35,8 @@ enum Commands {
         /// Name of the project directory to remove
         project_name: String,
     },
+    /// Run 'cargo test'
+    Test,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -73,20 +75,29 @@ fn main() -> Result<()> {
         Commands::Remove { project_name } => {
             remove_project(&project_name)?;
         }
+        Commands::Test => {
+            run_tests()?;
+        }
     }
 
     Ok(())
 }
 
 fn extract_entry(entry: &DirEntry, base_path: &Path, strip_prefix: &Path) -> Result<()> {
-    let relative_path = entry.path().strip_prefix(strip_prefix)
-        .with_context(|| format!("Failed to strip prefix {:?} from {:?}", strip_prefix, entry.path()))?;
-    
+    let relative_path = entry.path().strip_prefix(strip_prefix).with_context(|| {
+        format!(
+            "Failed to strip prefix {:?} from {:?}",
+            strip_prefix,
+            entry.path()
+        )
+    })?;
+
     match entry {
         DirEntry::Dir(dir) => {
             let path = base_path.join(relative_path);
             if !path.as_os_str().is_empty() {
-                fs::create_dir_all(&path).with_context(|| format!("Failed to create dir {:?}", path))?;
+                fs::create_dir_all(&path)
+                    .with_context(|| format!("Failed to create dir {:?}", path))?;
             }
             for child in dir.entries() {
                 extract_entry(child, base_path, strip_prefix)?;
@@ -95,9 +106,11 @@ fn extract_entry(entry: &DirEntry, base_path: &Path, strip_prefix: &Path) -> Res
         DirEntry::File(file) => {
             let path = base_path.join(relative_path);
             if let Some(parent) = path.parent() {
-                fs::create_dir_all(parent).with_context(|| format!("Failed to create dir {:?}", parent))?;
+                fs::create_dir_all(parent)
+                    .with_context(|| format!("Failed to create dir {:?}", parent))?;
             }
-            fs::write(&path, file.contents()).with_context(|| format!("Failed to write file {:?}", path))?;
+            fs::write(&path, file.contents())
+                .with_context(|| format!("Failed to write file {:?}", path))?;
         }
     }
     Ok(())
@@ -110,10 +123,14 @@ fn init_project(name: &str, lang: Lang) -> Result<()> {
     }
 
     println!("Initializing {:?} project '{}'...", lang.as_str(), name);
-    
+
     let template_path = Path::new(lang.as_str());
-    let template_dir = TEMPLATES_DIR.get_dir(template_path)
-        .with_context(|| format!("Template for {} not found in embedded assets", lang.as_str()))?;
+    let template_dir = TEMPLATES_DIR.get_dir(template_path).with_context(|| {
+        format!(
+            "Template for {} not found in embedded assets",
+            lang.as_str()
+        )
+    })?;
 
     fs::create_dir_all(dest).context("Failed to create destination directory")?;
 
@@ -136,10 +153,7 @@ fn init_project(name: &str, lang: Lang) -> Result<()> {
         Lang::Rust => {
             if Command::new("cargo").arg("--version").output().is_ok() {
                 println!("'cargo' detected, initializing with 'cargo init'...");
-                let _ = Command::new("cargo")
-                    .arg("init")
-                    .current_dir(dest)
-                    .status();
+                let _ = Command::new("cargo").arg("init").current_dir(dest).status();
             }
         }
         _ => {}
@@ -181,9 +195,21 @@ fn remove_project(name: &str) -> Result<()> {
     }
 
     println!("Removing project '{}'...", name);
-    fs::remove_dir_all(path)
-        .with_context(|| format!("Failed to remove directory '{}'", name))?;
+    fs::remove_dir_all(path).with_context(|| format!("Failed to remove directory '{}'", name))?;
 
     println!("Project '{}' removed successfully.", name);
+    Ok(())
+}
+
+fn run_tests() -> Result<()> {
+    println!("Running 'cargo test'...");
+    let status = Command::new("cargo")
+        .arg("test")
+        .status()
+        .context("Failed to execute 'cargo test'")?;
+
+    if !status.success() {
+        anyhow::bail!("'cargo test' command failed");
+    }
     Ok(())
 }
