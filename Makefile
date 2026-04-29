@@ -1,69 +1,24 @@
-# Project Name (edit this)
-TARGET_NAME = my_project
-BUILD_DIR = build
-BIN_DIR = bin
-EXECUTABLE = $(BIN_DIR)/$(TARGET_NAME)
+BINARY_NAME=mini
+INSTALL_DIR=$(HOME)/.local/bin
 
-# Source files (edit these) - MUST be in src/ directory
-SRCS = src/main.c src/example.c
-# Header files (edit these if you add headers outside src/include/)
-HDRS = src/include/example.h
+.PHONY: all build install clean uninstall test
 
-# Object files (placed in build/ directory)
-OBJS = $(SRCS:src/%.c=$(BUILD_DIR)/%.o)
+all: build
 
-# Compiler and flags
-CC = gcc
-# Comprehensive CFLAGS
-CFLAGS = -std=c11 -pedantic -Wall -Wextra -Werror -Wformat=2 -Wshadow -Wconversion -Wsign-conversion -Wundef -Wstrict-prototypes -Wmissing-prototypes -Wredundant-decls -Wpointer-arith -Wwrite-strings -Wold-style-definition -Isrc/include
-# Hardening flags
-HARDENING = -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE -fstack-clash-protection -fcf-protection
-# Optimization flags
-OPTFLAGS = -O2 -march=native -flto
+build:
+	cargo build --release
 
-# Linker flags
-LDFLAGS = -lm -pie -Wl,-z,relro,-z,now
+install: build
+	mkdir -p $(INSTALL_DIR)
+	cp target/release/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	@echo "Installed $(BINARY_NAME) to $(INSTALL_DIR)"
 
-# Combine all flags
-ALL_CFLAGS = $(CFLAGS) $(HARDENING) $(OPTFLAGS)
+uninstall:
+	rm -f $(INSTALL_DIR)/$(BINARY_NAME)
+	@echo "Uninstalled $(BINARY_NAME)"
 
-# Targets
-.PHONY: all clean run format lint directories
-
-all: directories $(EXECUTABLE)
-
-# Create output directories if they don't exist
-directories:
-	@mkdir -p $(BIN_DIR) $(BUILD_DIR)
-
-# Rule to compile .c files into .o files in the build/ directory
-$(BUILD_DIR)/%.o: src/%.c
-	@echo "Compiling $< ..."
-	$(CC) $(ALL_CFLAGS) -c $< -o $@
-
-# Rule to link the executable in the bin/ directory
-$(EXECUTABLE): $(OBJS)
-	@echo "Linking $@ ..."
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS)
-
-# Rule to clean up build artifacts
 clean:
-	@echo "Cleaning up build artifacts..."
-	@rm -rf $(BUILD_DIR) $(BIN_DIR)
+	cargo clean
 
-# Rule to run the executable
-run: $(EXECUTABLE)
-	@echo "Running $(EXECUTABLE) ..."
-	./$(EXECUTABLE)
-
-# Format code using clang-format
-FORMAT_FILES = $(SRCS) $(HDRS)
-format:
-	@echo "Formatting code..."
-	@clang-format -style=file:./.clang-format -i $(FORMAT_FILES)
-
-# Run static analysis with clang-tidy
-CLANG_TIDY_CHECKS = -checks=-*,readability-*,bugprone-*,performance-*,clang-analyzer-*
-lint:
-	@echo "Running static analysis..."
-	@clang-tidy $(CLANG_TIDY_CHECKS) $(SRCS) -- $(CFLAGS)
+test:
+	cargo test

@@ -1,60 +1,64 @@
-# Mini Project Template
+# Mini CLI Tool
 
-This repository serves as a template for creating new "mini-projects" in the series. It provides a standardized structure and common configurations to help you get started quickly.
+`mini` is a CLI tool designed to initialize and manage projects based on various templates.
 
-## Project Structure
+## Features
 
--   **`src/`**: Contains your main source code files (`.c`).
-    -   **`include/`**: Contains your header files (`.h`).
--   **`bin/`**: The compiled executable will be placed here.
--   **`Makefile`**: Build system configuration.
--   **`.clang-format`**: Code formatting configuration.
--   **`.clang-tidy`**: Static analysis configuration.
--   **`.gitignore`**: Specifies intentionally untracked files that Git should ignore.
--   **`LICENSE`**: The project's license.
--   **`README.md`**: This file.
+- **Portability**: All templates are embedded within the `mini` binary.
+- **Multi-language Support**:
+  - **C**: Standard C template.
+  - **C-Strict**: C template with comprehensive compiler and linker flags for hardening and static analysis.
+  - **Python**: Python template. Automatically runs `uv init` if `uv` is installed.
+  - **Rust**: Rust template. Automatically runs `cargo init`.
+- **Commands**:
+  - `init <project_name> [--lang <lang>]`: Initializes a new project. Default language is `c`.
+    - Supported languages: `c`, `c-strict`, `python`, `rust`.
+  - `make`: Runs `make` in the current directory.
+  - `clean`: Runs `make clean` in the current directory.
+  - `remove <project_name>`: Deletes the specified project directory.
 
-## Getting Started
+## Installation
 
-1.  **Clone this repository:**
-    ```bash
-    git clone <repository_url> my-new-project
-    cd my-new-project
-    ```
-    Replace `<repository_url>` with the URL of this template repository.
+### Prerequisites
 
-2.  **Clean Git History (Optional but Recommended):**
-    If you want a fresh Git history for your new project, you can do the following:
-    ```bash
-    rm -rf .git
-    git init
-    git add .
-    git commit -m "Initial commit from template"
-    # Add your remote origin if you plan to push to GitHub or another remote
-    # git remote add origin <your_project_remote_url>
-    ```
+- Rust and Cargo
+- GCC and Make (for C templates)
+- `uv` (optional, for enhanced Python support)
 
-3.  **Update Project-Specific Files:**
-    *   **`Makefile`**:
-        *   Edit the `TARGET_NAME` variable to your project's name.
-        *   Update the `SRCS` list to include all your `.c` files, ensuring they are prefixed with `src/`.
-        *   Review and adjust `CFLAGS` and `LDFLAGS` as needed.
-    *   **`README.md`**: Update this file to describe your specific project, its features, and any unique build instructions.
-    *   **Source Files**: Replace `src/main.c` and `src/include/example.h` with your project's actual source code. Add any other `.c` files to the `src/` directory and corresponding `.h` files to `src/include/`.
+### Steps
 
-4.  **Build and Run:**
-    Use the provided `Makefile` commands:
-    ```bash
-    make all  # Build your project (executable will be in bin/)
-    make run  # Run your project
-    make clean # Clean build artifacts
-    ```
+1. Clone this repository.
+2. Run `make install`. This will build the tool in release mode and copy the binary to `~/.local/bin/mini`.
+   ```bash
+   make install
+   ```
+3. Ensure `~/.local/bin` is in your `PATH`.
 
-## Configuration Files
+## Usage
 
--   **`.clang-format` & `.clang-tidy`**: These files are pre-configured for code style and basic linting. You can customize them to fit your preferences.
--   **`Makefile`**: A robust Makefile is provided. For projects with more complex build requirements (e.g., using libraries, custom build tools), you may need to modify this Makefile.
+### Initialize a C project
+```bash
+mini init my_c_project
+```
+
+### Initialize a Strict C project
+```bash
+mini init my_strict_project --lang c-strict
+```
+
+### Initialize a Python project
+```bash
+mini init my_python_project --lang python
+```
+
+### Build and Run
+Each template includes a `Makefile` to standardize common operations:
+```bash
+mini make      # Build/Install dependencies
+mini make run  # Execute the project
+mini clean     # Cleanup build artifacts
+```
 
 ## License
 
-This template is licensed under the MIT License.
+This tool and its templates are licensed under the MIT License.
