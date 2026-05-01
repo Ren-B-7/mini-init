@@ -10,7 +10,7 @@ build:
 
 install: build
 	mkdir -p $(INSTALL_DIR)
-	cp target/release/$(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)
+	install -m 755 target/release/$(BINARY_NAME) $(INSTALL_DIR)
 	@echo "Installed $(BINARY_NAME) to $(INSTALL_DIR)"
 
 uninstall:

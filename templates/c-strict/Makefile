@@ -3,6 +3,7 @@ TARGET_NAME = my_project
 BUILD_DIR = build
 BIN_DIR = bin
 EXECUTABLE = $(BIN_DIR)/$(TARGET_NAME)
+INSTALL_DIR = $(HOME)/.local/bin
 
 # Source files (edit these) - MUST be in src/ directory
 SRCS = src/main.c src/example.c
@@ -19,7 +20,7 @@ CFLAGS = -std=c11 -pedantic -Wall -Wextra -Werror -Wformat=2 -Wshadow -Wconversi
 # Hardening flags
 HARDENING = -D_FORTIFY_SOURCE=2 -fstack-protector-strong -fPIE -fstack-clash-protection -fcf-protection
 # Optimization flags
-OPTFLAGS = -O2 -march=native -flto
+OPTFLAGS = -O3 -march=native -flto
 
 # Linker flags
 LDFLAGS = -lm -pie -Wl,-z,relro,-z,now
@@ -28,7 +29,7 @@ LDFLAGS = -lm -pie -Wl,-z,relro,-z,now
 ALL_CFLAGS = $(CFLAGS) $(HARDENING) $(OPTFLAGS)
 
 # Targets
-.PHONY: all clean run format lint directories
+.PHONY: all clean run format lint directories install uninstall
 
 all: directories $(EXECUTABLE)
 
@@ -45,6 +46,19 @@ $(BUILD_DIR)/%.o: src/%.c
 $(EXECUTABLE): $(OBJS)
 	@echo "Linking $@ ..."
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS)
+
+# Rule to install the executable
+install: all
+	@echo "Installing $(TARGET_NAME) to $(INSTALL_DIR) ..."
+	@mkdir -p $(INSTALL_DIR)
+	@install -m 755 $(EXECUTABLE) $(INSTALL_DIR)
+	@echo "Installed $(TARGET_NAME) to $(INSTALL_DIR)"
+
+# Rule to uninstall the executable
+uninstall:
+	@echo "Uninstalling $(TARGET_NAME) from $(INSTALL_DIR) ..."
+	@rm -f $(INSTALL_DIR)/$(TARGET_NAME)
+	@echo "Uninstalled $(TARGET_NAME)"
 
 # Rule to clean up build artifacts
 clean:
