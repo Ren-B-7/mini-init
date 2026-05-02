@@ -1,73 +1,47 @@
-# Binaries
+# Build artifacts
 *.o
 *.obj
-*.exe
-*.dll
+*.ko
+*.elf
 *.so
+*.so.*
 *.dylib
 *.a
 *.la
-*.lrint
-*.lto
-*.lto.o
+*.lo
+*.lib
+*.dll
+*.exe
 *.out
-*.out.o
-*.so.debug
-*.so.dbg
-*.so.stripped
-*.a.debug
-*.a.dbg
-*.a.stripped
-*.dylib.debug
-*.dylib.dbg
-*.dylib.stripped
-*.la.debug
-*.la.dbg
-*.la.stripped
-*.out.debug
-*.out.dbg
-*.out.stripped
-*.a.dbg
-*.a.debug
-*.a.stripped
-*.so.dbg
-*.so.debug
-*.so.stripped
-*.dylib.dbg
-*.dylib.debug
-*.dylib.stripped
-*.la.dbg
-*.la.debug
-*.la.stripped
-*.out.dbg
-*.out.debug
-*.out.stripped
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.gch
+*.pch
 
 # Build directories
-build/*
-!build/.gitkeep
+build/
 out/
 dist/
-bin/*
-!bin/.gitkeep
+bin/
 obj/
 target/
+.tmp_versions/
 
-# Debugging symbols
+# Debugging & profiling
 *.dSYM/
-*.ghc/
+*.su
+*.idb
 *.pdb
-
-# Editor/IDE files
-.vscode/
-.idea/
-*.swp
-*~
-.DS_Store
-
-# OS generated files
-.DS_Store
-Thumbs.db
+*.dwo
+*.gcno
+*.gcda
+*.gcov
+*.prof
+*.profdata
+*.cov
+*.dyn
 
 # CMake
 CMakeCache.txt
@@ -75,7 +49,7 @@ CMakeFiles/
 cmake_install.cmake
 install_manifest.json
 
-# Autoconf
+# Autotools
 autom4te.cache/
 configure
 install-sh
@@ -83,8 +57,6 @@ missing
 py-compile
 symlink-tree
 ypch/
-
-# Autotools
 aclocal.m4
 build-aux/
 compile
@@ -93,27 +65,24 @@ config.log
 config.rpath
 config.status
 depcomp
-install-sh
 ltmain.sh
-missing
 mkinstalldirs
 test-driver
 
-# Other
-*.log
-*.tmp
-*.bak
-*.swp
-*.orig
+# Editor/IDE
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
+*.swp
+*~
+*.bak
+*.orig
 
-# Specific to C/C++ build artifacts
-*.gcno
-*.gcda
-*.gcov
-*.out
-*.prof
-*.profdata
-*.cov
-*.dyn
+# Logs & temp
+*.log
+*.tmp
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
