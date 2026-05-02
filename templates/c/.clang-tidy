@@ -1,0 +1,5 @@
+---
+Checks: '-*,readability-*,performance-*'
+HeaderFilterRegex: '^(?!.*).*$'
+FormatStyle: file
+User: Renier

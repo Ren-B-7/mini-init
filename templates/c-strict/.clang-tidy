@@ -1,0 +1,5 @@
+---
+Checks: '-bugprone-easily-swappable-parameters, -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling'
+HeaderFilterRegex: '^(?!.*).*$'
+FormatStyle: file
+User: Renier

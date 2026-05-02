@@ -1,42 +1,72 @@
-# Project Name
-TARGET_NAME = my_project
+# Project Name (edit this)
+TARGET_NAME = project
 BUILD_DIR = build
 BIN_DIR = bin
 EXECUTABLE = $(BIN_DIR)/$(TARGET_NAME)
-INSTALL_DIR = $(HOME)/.local/bin
 
-SRCS = src/main.c src/example.c
-HDRS = src/include/example.h
+# Source files (edit these) - MUST be in src/ directory
+SRCS = $(wildcard src/*.c)
+# Header files (edit these)
+HDRS = $(wildcard src/*.h)
+
+# Object files (placed in build/ directory)
 OBJS = $(SRCS:src/%.c=$(BUILD_DIR)/%.o)
 
+# Compiler
 CC = gcc
-CFLAGS = -Wall -Wextra -Isrc/include -O3
-LDFLAGS = -lm
 
-.PHONY: all clean run directories install uninstall
+# Standard compilation flags
+CFLAGS = -std=c99 -Wall -Wextra -Isrc
+
+# Optimization
+OPTFLAGS = -O2
+
+# Linker flags
+LDFLAGS = 
+
+# Combine all flags
+ALL_CFLAGS = $(CFLAGS) $(OPTFLAGS)
+
+# Targets
+.PHONY: all clean run format lint directories
 
 all: directories $(EXECUTABLE)
 
+# Create output directories if they don't exist
 directories:
 	@mkdir -p $(BIN_DIR) $(BUILD_DIR)
 
+# Rule to compile .c files into .o files in the build/ directory
 $(BUILD_DIR)/%.o: src/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compiling $< ..."
+	$(CC) $(ALL_CFLAGS) -c $< -o $@
 
+# Rule to link the executable in the bin/ directory
 $(EXECUTABLE): $(OBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS)
+	@echo "Linking $@ ..."
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o $(EXECUTABLE) $(OBJS) -lm
 
-install: all
-	mkdir -p $(INSTALL_DIR)
-	install -m 755 $(EXECUTABLE) $(INSTALL_DIR)
-	@echo "Installed $(TARGET_NAME) to $(INSTALL_DIR)"
-
-uninstall:
-	rm -f $(INSTALL_DIR)/$(TARGET_NAME)
-	@echo "Uninstalled $(TARGET_NAME)"
-
+# Rule to clean up build artifacts
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	@echo "Cleaning up build artifacts..."
+	@rm -rf $(BUILD_DIR) $(BIN_DIR)
 
+# Rule to run the executable
 run: $(EXECUTABLE)
+	@echo "Running $(EXECUTABLE) ..."
 	./$(EXECUTABLE)
+
+# Format code using clang-format
+format:
+	@echo "Formatting code..."
+	@clang-format -style=file:./.clang-format -i $(SRCS) $(HDRS)
+	mbake format --config ./.bake.toml Makefile
+
+# Run static analysis with clang-tidy
+CLANG_TIDY_CHECKS = -checks=-*,readability-*,performance-*
+CLANG_TIDY_FLAGS = -std=c99 -Wall -Wextra -Isrc
+
+lint:
+	@echo "Running static analysis..."
+	@clang-tidy $(CLANG_TIDY_CHECKS) $(SRCS) -- $(CLANG_TIDY_FLAGS)
+	mbake validate --config ./.bake.toml Makefile
